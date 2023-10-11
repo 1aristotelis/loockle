@@ -1,8 +1,9 @@
 'use client'
 
 import { RelayBroadcastResponse } from "@/types";
+import { getAddressByPaymail } from "@/utils/relayx";
 import { lsTest, useLocalStorage } from "@/utils/storage";
-import React, { createContext, useContext, useMemo } from "react"
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { bsv } from "scrypt-ts";
 
 interface RelayXContextValue {
@@ -38,10 +39,15 @@ const RelayXProvider = (props: { children: React.ReactNode }) => {
       }
   
     },[relayXAuthToken])
-    const relayXAddress = useMemo(() => {
-      return relayXPublicKey && relayXPublicKey.length > 0 ? new bsv.PublicKey(relayXPublicKey).toAddress().toString() : ""
-    },[relayXPublicKey])
+    const [relayXAddress, setRelayXAddress] = useState("")
     const relayXAuthenticated = useMemo(() => relayXAuthToken && relayXAuthToken.length > 0,[relayXAuthToken])
+
+    useEffect(() => {
+      console.log("get address")
+      getAddressByPaymail(relayXPaymail).then((resp) => {
+        console.log(resp)
+      })
+    }, [relayXPaymail])
 
     const relayXAuthenticate = async () => {
       if (typeof window === "undefined") {
@@ -68,6 +74,7 @@ const RelayXProvider = (props: { children: React.ReactNode }) => {
         // localStorage.setItem('paymail', returnedPaymail);
         setRelayXPaymail(returnedPaymail);
         console.log('pubkey', new bsv.PublicKey(pubkey))
+        
   
       } else {
         throw new Error(
