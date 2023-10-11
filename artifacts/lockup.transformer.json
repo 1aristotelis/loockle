@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "errors": [],
+  "scryptfile": "contracts/lockup.scrypt",
+  "sourceMapFile": "contracts/lockup.scrypt.map",
+  "ctxMethods": [
+    "redeem"
+  ]
+}
