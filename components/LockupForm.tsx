@@ -115,7 +115,8 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
             <span>This website is experimental, Lock at your own risk</span>
         </div>
         <div className='w-full flex justify-end mt-5'>
-            <button disabled={!(amount > 0) || !(blockHeight > 0)} type='submit' className="btn btn-primary">Lock It Up!</button>
+            {/* <button disabled={!(amount > 0) || !(blockHeight > 0)} type='submit' className="btn btn-primary">Lock It Up!</button> */}
+            <button disabled={true} type='submit' className="btn btn-primary">Lock It Up!</button>
         </div>
     </form>
   )
