@@ -1,5 +1,6 @@
 'use client'
 
+import { useBitcoin } from '@/context/BitcoinContext';
 import { buildLockTransaction } from '@/utils/lockup';
 import { getDaysByBlocks } from '@/utils/time';
 import React, { useMemo, useState } from 'react'
@@ -10,6 +11,7 @@ interface LockupFormProps {
 }
 
 const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
+    const { authenticated } = useBitcoin()
     const [amount, setAmount] = useState(0)
     const [blockHeight, setBlockHeight] = useState(0)
     const [lockToAddress, setLockToAddress] = useState("")
@@ -33,6 +35,10 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if(!authenticated){
+            //@ts-ignore
+            document.getElementById('wallet_selector')!.showModal()
+        }
         if (!(amount > 0) || !(blockHeight > 0)){
             return
         }
