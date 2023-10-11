@@ -46,10 +46,11 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
         const lockUntilHeight = currentHeight + blockHeight
         const lockToAddress = ""
 
-        console.log("satoshi amount", satoshis, "lock until height", lockUntilHeight)
-
+        
         try {
+            console.log("lock.tx.params", { likeTxid: txid, amount: satoshis, blockHeight: lockUntilHeight, address: lockToAddress })
             const tx = buildLockTransaction({ likeTxid: txid, amount: satoshis, blockHeight: lockUntilHeight, address: lockToAddress })
+            console.log("lock.tx", tx)
         } catch (error) {
             
         }

@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import WalletSelector from '@/components/WalletSelector'
+import Navbar from '@/components/Navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +23,7 @@ export default function RootLayout({
       <Script src="https://one.relayx.io/relayone.js"/>
       <body className={inter.className}>
         <Providers>
+          <Navbar/>
           {children}
           <dialog id="wallet_selector" className="modal">
             <div className="modal-box">
