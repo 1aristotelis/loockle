@@ -3,8 +3,13 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
-import WalletSelector from '@/components/WalletSelector'
-import Navbar from '@/components/Navbar'
+import dynamic from 'next/dynamic'
+const Navbar = dynamic(() => import("@/components/Navbar"),{
+  ssr: false
+})
+const WalletSelector = dynamic(() => import("@/components/WalletSelector"), {
+  ssr: false
+}) 
 
 const inter = Inter({ subsets: ['latin'] })
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { RelayBroadcastResponse } from "@/types";
 import { lsTest, useLocalStorage } from "@/utils/storage";
 import React, { createContext, useContext, useMemo } from "react"
 import { bsv } from "scrypt-ts";
@@ -13,6 +14,7 @@ interface RelayXContextValue {
   relayXAuthenticate: () => Promise<void>;
   relayXAuthenticated: boolean;
   relayXLogout: () => void;
+  relayXSendTransaction: (tx: bsv.Transaction) => Promise<RelayBroadcastResponse | null>;
 }
 
 const RelayContext = createContext<RelayXContextValue | undefined>(undefined);
@@ -74,6 +76,32 @@ const RelayXProvider = (props: { children: React.ReactNode }) => {
       }
     }
 
+    const relayXSendTransaction = async (tx: bsv.Transaction): Promise<RelayBroadcastResponse | null> => {
+      if (typeof window === "undefined") {
+        throw new Error ("RelayX not yet Loaded")
+      }
+      //@ts-ignore
+      const relayOne = window.relayone
+      const outputs = tx.outputs
+      try {
+        const response: RelayBroadcastResponse = await relayOne.send({
+    
+          outputs: outputs.map((output: bsv.Transaction.Output) => ({
+              to: output.script.toASM(),
+              amount: Number(output.satoshis) * 1e-8,
+              currency: 'BSV',
+          })),
+    
+        })
+  
+        return response
+        
+      } catch (error) {
+        throw error
+      }
+
+    }
+
     const relayXLogout = () => {
       setRelayXAuthToken(undefined)
       setRelayXPaymail(undefined)
@@ -89,6 +117,7 @@ const RelayXProvider = (props: { children: React.ReactNode }) => {
       relayXAvatar,
       relayXAuthenticate,
       relayXAuthenticated,
+      relayXSendTransaction,
       relayXLogout
     }),[
       relayXPaymail,
@@ -98,6 +127,7 @@ const RelayXProvider = (props: { children: React.ReactNode }) => {
       relayXAvatar,
       relayXAuthenticate,
       relayXAuthenticated,
+      relayXSendTransaction,
       relayXLogout
     ])
     return (<RelayContext.Provider value={value} {...props} />);
