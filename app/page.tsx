@@ -1,9 +1,12 @@
-import dynamic from "next/dynamic";
+import SearchTxid from "@/components/SearchTxid";
 
-const Notifications = dynamic(() => import("@/components/Notifications"), {
-  ssr: false
-})
 
 export default function Home() {
-  return <Notifications/>
+  return (
+    <div className="hero min-h-screen bg-base-200">
+      <div className="hero-content text-center">
+        <SearchTxid/>
+      </div>
+    </div>
+  )
 }
