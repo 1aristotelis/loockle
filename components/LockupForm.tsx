@@ -39,6 +39,12 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
 
         console.log("satoshi amount", satoshis, "lock until height", lockUntilHeight)
 
+        try {
+            
+        } catch (error) {
+            
+        }
+
     }
 
     const handleChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,3 +84,7 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
 }
 
 export default LockupForm
+
+async function buildLockScript() {
+    
+}
