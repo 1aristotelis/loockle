@@ -1,13 +1,49 @@
 'use client'
 
+import { Lockup } from "@/contracts/lockup"
+import { Lockup as LoadedLockup } from "@/utils/lockup"
+import LocalWallet from "@/wallets/local"
 import React, { useState } from "react"
+import toast from "react-hot-toast"
+import { MethodCallOptions, PubKey, findSig, toHex } from "scrypt-ts"
 
 export default function UnlockForm(){
     const [txToUnlock, setTxToUnlock] = useState("")
     const [seedPhrase, setSeedPhrase] = useState("")
     
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        try {
+            const wallet = LocalWallet.fromPhrase({ phrase : seedPhrase })
+            const tx = await wallet.signer.connectedProvider.getTransaction(txToUnlock)
+            const instance = LoadedLockup.fromTx(tx, 0)
 
+            await instance.connect(wallet.signer)
+            
+            const { tx: callTx } = await instance.methods.redeem(
+                (sigResps:any) => findSig(sigResps, wallet.publicKey!),
+                PubKey(toHex(wallet.publicKey!)),
+                {
+                    pubKeyOrAddrToSign: wallet.publicKey
+                } as MethodCallOptions<Lockup>
+            )
+
+            console.log('contract called: ', callTx.id);
+            toast.custom(
+                <div className="alert alert-success max-w-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span className="">You just unlocked 10₿, congrats!</span>
+                    <a href={`https://whatsonchain.com/tx/${callTx.id}`} target="_blank" rel="noreferrer" className="btn btn-xs btn-ghost">View</a>
+                </div>
+            )
+        } catch (error:any) {
+            toast.custom(
+                <div className="alert alert-error max-w-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>{error}</span>
+                </div>
+            )
+        }
     }
 
     const handleChangeTxToUnlock = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,7 +52,7 @@ export default function UnlockForm(){
 
 
     return (
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="form-control">
                 <label className="label">
                     <span className="label-text">Lock Transaction to Unlock</span>
@@ -30,7 +66,7 @@ export default function UnlockForm(){
                 <textarea className="textarea textarea-primary" placeholder="Enter your Bitcoin wallet seed phrase"/>
             </div>
             <div className="w-full flex justify-center mt-5">
-                <button className="btn btn-primary">Unlock</button>
+                <button type="submit" className="btn btn-primary">Unlock</button>
             </div>
         </form>
     )

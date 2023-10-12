@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import dynamic from 'next/dynamic'
+import { Toaster } from 'react-hot-toast'
 const Navbar = dynamic(() => import("@/components/Navbar"),{
   ssr: false
 })
@@ -30,6 +31,7 @@ export default function RootLayout({
         <Providers>
           <Navbar/>
           {children}
+          <Toaster/>
           <dialog id="wallet_selector" className="modal">
             <div className="modal-box">
               <WalletSelector/>

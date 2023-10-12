@@ -59,3 +59,5 @@ export function buildLockTransaction({ likeTxid, emoji, tags, amount, blockHeigh
     return tx
     
 }
+
+export { Lockup }
