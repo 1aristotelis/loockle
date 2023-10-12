@@ -23,15 +23,15 @@ const SearchTxid = () => {
         router.push(`/t/${searchInput}`)
     }
   return (
-    <div className='flex flex-col items-start'>
-    <form onSubmit={handleSubmit} className='join'>
-        <div className="tooltip join-item" data-tip="Paste any Bitcoin transaction hash here">
-            <input onChange={handleChange} value={searchInput} type="text" placeholder="Search Bitcoin" className={`input input-bordered ${error ? "input-error" : "input-primary"} w-full rounded-l-full max-w-xs`} />
+    <form onSubmit={handleSubmit} className='flex justify-center w-full max-w-3xl mx-auto'>
+        <div className='flex flex-col sm:flex-row w-full sm:join'>
+            <div className="tooltip w-full" data-tip="Paste any Bitcoin transaction hash here">
+                <input onChange={handleChange} value={searchInput} type="text" placeholder="Search Bitcoin" className={`input input-bordered sm:join-item ${error ? "input-error" : "input-primary"} w-full sm:rounded-l-full`} />
+            </div>
+            <button disabled={error} type="submit" className="mt-5 sm:mt-0 mx-auto sm:mx-0 btn btn-primary sm:join-item sm:rounded-r-full">Search</button>
         </div>
-        <button disabled={error} type="submit" className="btn btn-primary join-item rounded-r-full">Search</button>
+        {error && <span className='text-error'>Invalid txid!</span>}
     </form>
-    {error && <span className='text-error'>Invalid txid!</span>}
-    </div>
   )
 }
   

@@ -72,12 +72,12 @@ const WalletProviderPopUp = () => {
   const handleRelayXAuth = async (e:any) => {
     e.preventDefault()
     try {
+      //@ts-ignore
+      document.getElementById("wallet_selector")?.close()
       if (!relayXAuthenticated){
         await relayXAuthenticate()
       }
       setWallet("relayx")
-      //@ts-ignore
-      document.getElementById("wallet_selector")?.close()
     } catch (error) {
       console.log(error)
     }
@@ -207,7 +207,7 @@ const WalletProviderPopUp = () => {
                   d="M9 5l7 7-7 7"
                 />
               </svg>) : (
-                <button onClick={handleRelayXLogout} className="bg-red-500 text-sm text-white px-3 py-2 rounded-lg">Log out</button>
+                <div onClick={handleRelayXLogout} className="bg-red-500 text-sm text-white px-3 py-2 rounded-lg">Log out</div>
               )}
             </button>
 
@@ -247,7 +247,7 @@ const WalletProviderPopUp = () => {
                   d="M9 5l7 7-7 7"
                 />
               </svg>) : (
-                <button onClick={handleTwetchLogout} className="bg-red-500 text-sm text-white px-3 py-2 rounded-lg">Log out</button>
+                <div onClick={handleTwetchLogout} className="bg-red-500 text-sm text-white px-3 py-2 rounded-lg">Log out</div>
               )}
             </button>
 
@@ -281,7 +281,7 @@ const WalletProviderPopUp = () => {
                   d="M9 5l7 7-7 7"
                 />
               </svg>) : (
-                <button onClick={handleLocalWalletLogout} className="bg-red-500 text-sm text-white px-3 py-2 rounded-lg">Log out</button>
+                <div onClick={handleLocalWalletLogout} className="bg-red-500 text-sm text-white px-3 py-2 rounded-lg">Log out</div>
               )}
             </button>
           </div>):(
