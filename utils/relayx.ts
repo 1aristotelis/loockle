@@ -1,6 +1,6 @@
 import axios from "axios"
 import { hexToBase58 } from "./string";
-import { ripemd160, sha256 } from "scrypt-ts";
+import { bsv, ripemd160, sha256 } from "scrypt-ts";
 export async function getAddressByPaymail(paymail: string){
     let now = JSON.stringify({'now': new Date()});
     const requestData = {
@@ -13,9 +13,9 @@ export async function getAddressByPaymail(paymail: string){
                 'Content-Type': 'application/json',
               },
         })
-        const output = data.output
-        const address = hexToBase58("00"+sha256(output))
-        console.log(address)
+        const output: string = data.output
+        const hash = output.substring(6,46)
+        const address = bsv.Address.fromPublicKeyHash(Buffer.from(hash,"hex")).toString()
         return address
     } catch (error) {
         console.log(error)

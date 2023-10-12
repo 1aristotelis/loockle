@@ -43,10 +43,7 @@ const RelayXProvider = (props: { children: React.ReactNode }) => {
     const relayXAuthenticated = useMemo(() => relayXAuthToken && relayXAuthToken.length > 0,[relayXAuthToken])
 
     useEffect(() => {
-      console.log("get address")
-      getAddressByPaymail(relayXPaymail).then((resp) => {
-        console.log(resp)
-      })
+      getAddressByPaymail(relayXPaymail).then(address => setRelayXAddress(address))
     }, [relayXPaymail])
 
     const relayXAuthenticate = async () => {
