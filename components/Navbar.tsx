@@ -1,6 +1,7 @@
 "use client"
 
 import { useBitcoin } from '@/context/BitcoinContext'
+import Link from 'next/link'
 import React from 'react'
 
 const Navbar = () => {
@@ -30,8 +31,8 @@ const Navbar = () => {
                             Profile
                             <span className="badge">New</span>
                         </a>
-                    </li>
-                    <li><a>Settings</a></li> */}
+                    </li> */}
+                    <li><Link href="/unlock">Unlock</Link></li> 
                     <li><button onClick={logout}>Logout</button></li>
                 </ul>
             </div> : <button type="button" onClick={handleLogIn} className='btn btn-primary'>Log In</button>}
