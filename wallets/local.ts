@@ -29,6 +29,7 @@ export default class LocalWallet extends Wallet {
     const derivationPaths = {
       sensiletDefault:        `m/44'/0'/0'/0/0`,
       relayxBsv:              `m/44'/236'/0'/0/0`,
+      relayxPaymail:          `m/44'/236'/0'/0/1`,
       relayxChange:           `m/44'/236'/0'/1/0`,
       relayxRunOwner:         `m/44'/236'/0'/2/0`,
       relayxMarketOrderCancel:`m/44'/236'/0'/3/0`,
@@ -36,7 +37,7 @@ export default class LocalWallet extends Wallet {
       twetchWallet: `m/44'/0'/0'/0`
     }
 
-    this.privateKey = hdPrivateKey.deriveChild(derivationPaths.sensiletDefault).privateKey
+    this.privateKey = hdPrivateKey.deriveChild(derivationPaths.relayxPaymail).privateKey
     this.publicKey = this.privateKey?.publicKey
 
     this.paymail = `${this.address.toString()}@pow.co`
