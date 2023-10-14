@@ -2,9 +2,12 @@
 
 import { useBitcoin } from '@/context/BitcoinContext';
 import { useRelayX } from '@/context/RelayXContext';
-import { buildLockTransaction } from '@/utils/lockup';
+import { buildLockTransaction, buildLockupScript } from '@/utils/lockup';
 import { getDaysByBlocks } from '@/utils/time';
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import toast from 'react-hot-toast';
+import NotifySuccess from './NotifySuccess';
+import NotifyError from './NotifyError';
 
 interface LockupFormProps {
     txid: string;
@@ -17,6 +20,11 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
     const [amount, setAmount] = useState(0)
     const [blockHeight, setBlockHeight] = useState(0)
     const [lockToAddress, setLockToAddress] = useState(relayXAddress || "")
+
+    useEffect(() => {
+        relayXAddress && relayXAddress.length > 0 && setLockToAddress(relayXAddress)
+    },[relayXAddress])
+    
     const timeEquivalent = useMemo(() => {
         const days = getDaysByBlocks(blockHeight)
         switch (true){
@@ -65,8 +73,10 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
 
             const relayXResponse = await relayXSendTransaction(tx)
             console.log(relayXResponse)
-        } catch (error) {
+            toast.custom(<NotifySuccess message={`You just locked ${amount}₿ until block #${lockUntilHeight}!`} txid={relayXResponse!.txid}/>)
+        } catch (error:any) {
             console.error(error)
+            toast.custom(<NotifyError message={error.toString()} />)
         }
 
     }
@@ -115,8 +125,8 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
             <span>This website is experimental, Lock at your own risk</span>
         </div>
         <div className='w-full flex justify-end mt-5'>
-            {/* <button disabled={!(amount > 0) || !(blockHeight > 0)} type='submit' className="btn btn-primary">Lock It Up!</button> */}
-            <button disabled={true} type='submit' className="btn btn-primary">Lock It Up!</button>
+            <button disabled={!(amount > 0) || !(blockHeight > 0)} type='submit' className="btn btn-primary">Lock It Up!</button>
+            {/* <button disabled={true} type='submit' className="btn btn-primary">Lock It Up!</button> */}
         </div>
     </form>
   )

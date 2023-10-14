@@ -37,7 +37,7 @@ export default class LocalWallet extends Wallet {
       twetchWallet: `m/44'/0'/0'/0`
     }
 
-    this.privateKey = hdPrivateKey.deriveChild(derivationPaths.relayxPaymail).privateKey
+    this.privateKey = hdPrivateKey.deriveChild(derivationPaths.relayxBsv).privateKey
     this.publicKey = this.privateKey?.publicKey
 
     this.paymail = `${this.address.toString()}@pow.co`

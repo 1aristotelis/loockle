@@ -16,6 +16,7 @@ export async function getAddressByPaymail(paymail: string){
         const output: string = data.output
         const hash = output.substring(6,46)
         const address = bsv.Address.fromPublicKeyHash(Buffer.from(hash,"hex")).toString()
+        console.log("relayX Address", address)
         return address
     } catch (error) {
         console.log(error)

@@ -9,7 +9,10 @@ Lockup.loadArtifact(artifact)
 const bsocial = new Bsocial("loockle.com")
 
 export function buildLockupScript(address: string, blockHeight: number):string {
-    const newLockup = new Lockup( Ripemd160(toByteString(address, true)), BigInt(blockHeight))
+    const p2pkhOut = new bsv.Transaction.Output({ script: new bsv.Script(new bsv.Address(address)), satoshis:1 })
+    const addressHex = p2pkhOut.script.chunks[2].buf.toString("hex")
+    console.log("address hex", addressHex)
+    const newLockup = new Lockup( addressHex as Ripemd160, BigInt(blockHeight))
 
     return newLockup.lockingScript.toASM()
 }

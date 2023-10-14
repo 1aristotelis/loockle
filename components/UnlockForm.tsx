@@ -6,6 +6,8 @@ import LocalWallet from "@/wallets/local"
 import React, { useState } from "react"
 import toast from "react-hot-toast"
 import { MethodCallOptions, PubKey, findSig, hash160, toByteString, toHex } from "scrypt-ts"
+import NotifySuccess from "./NotifySuccess"
+import NotifyError from "./NotifyError"
 
 export default function UnlockForm(){
     const [txToUnlock, setTxToUnlock] = useState("")
@@ -16,19 +18,20 @@ export default function UnlockForm(){
         try {
             const wallet = LocalWallet.fromPhrase({ phrase : seedPhrase })
             await wallet.signer.connect()
+            const signingPubkey = await wallet.signer.getDefaultPubKey();
             const tx = await wallet.signer.connectedProvider.getTransaction(txToUnlock)
             const instance = LoadedLockup.fromTx(tx, 0)
 
             console.log("pkhash to unlock",instance.pkhash)
-            console.log("my pkhash", hash160(PubKey(toHex(wallet.publicKey!))))
+            console.log("my pkhash", hash160(PubKey(signingPubkey.toString())))
 
             const lockUntilHeight = Number(instance.lockUntilHeight)
 
             await instance.connect(wallet.signer)
             
             const { tx: callTx } = await instance.methods.redeem(
-                (sigResps:any) => findSig(sigResps, wallet.publicKey!),
-                PubKey(toHex(wallet.publicKey!)),
+                (sigResps:any) => findSig(sigResps, signingPubkey),
+                PubKey(signingPubkey.toString()),
                 {
                     //pubKeyOrAddrToSign: wallet.publicKey,
                     lockTime:lockUntilHeight
@@ -37,19 +40,12 @@ export default function UnlockForm(){
 
             console.log('contract called: ', callTx.id);
             toast.custom(
-                <div className="alert alert-success max-w-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span className="">You just unlocked 10₿, congrats!</span>
-                    <a href={`https://whatsonchain.com/tx/${callTx.id}`} target="_blank" rel="noreferrer" className="btn btn-xs btn-ghost">View</a>
-                </div>
+                <NotifySuccess message={`You just unlocked 10₿, congrats!`} txid={callTx.id} />
             )
         } catch (error:any) {
             console.log(error)
             toast.custom(
-                <div className="alert alert-error max-w-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>{error.toString()}</span>
-                </div>
+                <NotifyError message={error.toString()}/>
             )
         }
     }
