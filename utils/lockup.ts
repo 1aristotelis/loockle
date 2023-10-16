@@ -3,6 +3,9 @@ import { Lockup } from "@/contracts/lockup";
 import Bsocial from "bsocial"
 import bops from "bops"
 import artifact from "@/artifacts/lockup.json"
+import { getRawTx } from "./whatsonchain";
+import { getUTXO } from "./bitcoin";
+import { hex2Int } from "./string";
 
 Lockup.loadArtifact(artifact)
 
@@ -61,6 +64,63 @@ export function buildLockTransaction({ likeTxid, emoji, tags, amount, blockHeigh
     }
     return tx
     
+}
+
+interface BuildUnlockScriptProps {
+    txHex: string;
+    inputIndex: number;
+    lockTokenScript: string;
+    satoshis: number;
+    privkey: bsv.PrivateKey;
+}
+
+const buildUnlockLockScript = ({ txHex, inputIndex, lockTokenScript, satoshis, privkey }: BuildUnlockScriptProps) => {
+    const tx = new bsv.Transaction(txHex);
+    const sighashType = bsv.crypto.Signature.SIGHASH_ALL | bsv.crypto.Signature.SIGHASH_FORKID;
+    const scriptCode = bsv.Script.fromHex(lockTokenScript);
+    const value = new bsv.crypto.BN(satoshis);
+    // create preImage of current transaction with valid nLockTime
+    const preimg = bsv.Transaction.Sighash.sighashPreimage(tx, sighashType, inputIndex, scriptCode, value).toString('hex');
+    let s;
+    if (privkey) {// sign transaction with private key tied to public key locked in script
+        s = bsv.Transaction.Sighash.sign(tx, privkey, sighashType, inputIndex, scriptCode, value).toTxFormat();
+    }
+    return bsv.Script.fromASM(`${s!.toString('hex')} ${privkey.toPublicKey().toHex()} ${preimg}`).toHex();
+}
+
+interface UnlockTransactionProps {
+    txid: string;
+    oIdx?: number;
+    receiveAddress: string;
+    privkey: bsv.PrivateKey;
+}
+
+export async function buildUnlockTransaction({ txid, receiveAddress, privkey, oIdx = 0 }: UnlockTransactionProps): Promise<{ redeemTx: string, satoshisUnlocked: number }>{
+    try {
+        const rawtx = await getRawTx(txid)
+        const lockedUTXO = getUTXO(rawtx, oIdx)
+        const bsvTx = new bsv.Transaction()
+        const lockedScript = new bsv.Script(lockedUTXO.script)
+        bsvTx.addInput(new bsv.Transaction.Input({
+            prevTxId: txid,
+            outputIndex: oIdx,
+            script: new bsv.Script("")
+        }), lockedScript, lockedUTXO.satoshis)
+        const lockedBlockHex = lockedScript.chunks[6].buf.toString('hex');
+        const lockedBlock = hex2Int(lockedBlockHex);
+        bsvTx.lockUntilBlockHeight(lockedBlock);
+        bsvTx.to(receiveAddress, lockedUTXO.satoshis - 1); // subtract 1 satoshi to pay the transaction fee
+        const solution = buildUnlockLockScript({ txHex: bsvTx.toString(), inputIndex: oIdx, lockTokenScript: lockedUTXO.script, satoshis: lockedUTXO.satoshis, privkey })
+        bsvTx.inputs[0].setScript(new bsv.Script(solution));
+        return {
+            redeemTx: bsvTx.toString(),
+            satoshisUnlocked: lockedUTXO.satoshis
+        };
+    } catch (error) {
+        throw error
+        console.error(error)
+        
+    }
 }
 
 export { Lockup }

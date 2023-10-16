@@ -1,23 +1,32 @@
 'use client'
 
 import { Lockup } from "@/contracts/lockup"
-import { Lockup as LoadedLockup } from "@/utils/lockup"
+import { Lockup as LoadedLockup, buildUnlockTransaction } from "@/utils/lockup"
 import LocalWallet from "@/wallets/local"
 import React, { useState } from "react"
 import toast from "react-hot-toast"
 import { MethodCallOptions, PubKey, findSig, hash160, toByteString, toHex } from "scrypt-ts"
 import NotifySuccess from "./NotifySuccess"
 import NotifyError from "./NotifyError"
+import { useRelayX } from "@/context/RelayXContext"
 
 export default function UnlockForm(){
+
+    const { relayXAddress } = useRelayX()
     const [txToUnlock, setTxToUnlock] = useState("")
     const [seedPhrase, setSeedPhrase] = useState("")
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        // tx to unlock (might not work cuz 1sat locked) : 342767848fd05057808b4f381c10df52e7a8738745bd90d4ce2d0517b5be1fe1
         try {
             const wallet = LocalWallet.fromPhrase({ phrase : seedPhrase })
-            await wallet.signer.connect()
+            console.log({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
+            const { redeemTx, satoshisUnlocked } = await buildUnlockTransaction({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
+            console.log(redeemTx, satoshisUnlocked)
+
+
+            /* await wallet.signer.connect()
             const signingPubkey = await wallet.signer.getDefaultPubKey();
             const tx = await wallet.signer.connectedProvider.getTransaction(txToUnlock)
             const instance = LoadedLockup.fromTx(tx, 0)
@@ -41,12 +50,12 @@ export default function UnlockForm(){
             console.log('contract called: ', callTx.id);
             toast.custom(
                 <NotifySuccess message={`You just unlocked 10₿, congrats!`} txid={callTx.id} />
-            )
-        } catch (error:any) {
+            ) */
+        } catch (error) {
             console.log(error)
-            toast.custom(
-                <NotifyError message={error.toString()}/>
-            )
+            /* toast.custom(
+                <NotifyError message={error}/>
+            ) */
         }
     }
 

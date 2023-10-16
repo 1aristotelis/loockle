@@ -29,3 +29,18 @@ export function encodeWithLeadingZero(bytes: Uint8Array): string {
   
     return encoded;
 }
+
+const changeEndianness = (string:string) => {// change endianess of hex value before placing into ASM script
+    const result = [];
+    let len = string.length - 2;
+    while (len >= 0) {
+      result.push(string.substr(len, 2));
+      len -= 2;
+    }
+    return result.join('');
+}
+
+export function hex2Int(hex:string){
+    const reversedHex = changeEndianness(hex);
+    return parseInt(reversedHex, 16);
+}
