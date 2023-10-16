@@ -9,6 +9,7 @@ import { MethodCallOptions, PubKey, findSig, hash160, toByteString, toHex } from
 import NotifySuccess from "./NotifySuccess"
 import NotifyError from "./NotifyError"
 import { useRelayX } from "@/context/RelayXContext"
+import { broadcastTx } from "@/utils/whatsonchain"
 
 export default function UnlockForm(){
 
@@ -24,6 +25,9 @@ export default function UnlockForm(){
             console.log({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
             const { redeemTx, satoshisUnlocked } = await buildUnlockTransaction({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
             console.log(redeemTx, satoshisUnlocked)
+            const broadcastResp = await broadcastTx(redeemTx)
+            console.log(broadcastResp)
+            toast.custom(<NotifySuccess txid={broadcastResp} message={`You just unlocked ₿${(satoshisUnlocked *1e-8).toFixed(4)}!`}/>)
 
 
             /* await wallet.signer.connect()
@@ -51,11 +55,11 @@ export default function UnlockForm(){
             toast.custom(
                 <NotifySuccess message={`You just unlocked 10₿, congrats!`} txid={callTx.id} />
             ) */
-        } catch (error) {
+        } catch (error:any) {
             console.log(error)
-            /* toast.custom(
-                <NotifyError message={error}/>
-            ) */
+            toast.custom(
+                <NotifyError message={error.toString()}/>
+            )
         }
     }
 

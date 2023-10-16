@@ -106,7 +106,7 @@ export async function buildUnlockTransaction({ txid, receiveAddress, privkey, oI
             outputIndex: oIdx,
             script: new bsv.Script("")
         }), lockedScript, lockedUTXO.satoshis)
-        const lockedBlockHex = lockedScript.chunks[6].buf.toString('hex');
+        const lockedBlockHex = lockedScript.chunks[18].buf.toString("hex");
         const lockedBlock = hex2Int(lockedBlockHex);
         bsvTx.lockUntilBlockHeight(lockedBlock);
         bsvTx.to(receiveAddress, lockedUTXO.satoshis - 1); // subtract 1 satoshi to pay the transaction fee
@@ -117,8 +117,8 @@ export async function buildUnlockTransaction({ txid, receiveAddress, privkey, oI
             satoshisUnlocked: lockedUTXO.satoshis
         };
     } catch (error) {
-        throw error
         console.error(error)
+        throw error
         
     }
 }

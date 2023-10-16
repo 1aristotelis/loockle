@@ -10,3 +10,16 @@ export async function getRawTx(txid:string){
     const raw = await r.text();
     return raw;
 }
+
+export async function broadcastTx(txhex:string){
+    try {
+        const { data } = await axios.post(`https://api.whatsonchain.com/v1/bsv/main/tx/raw`, {
+            txhex
+        })
+
+        return data
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+}
