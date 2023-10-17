@@ -95,7 +95,7 @@ interface UnlockTransactionProps {
     privkey: bsv.PrivateKey;
 }
 
-export async function buildUnlockTransaction({ txid, receiveAddress, privkey, oIdx = 0 }: UnlockTransactionProps): Promise<{ redeemTx: string, satoshisUnlocked: number }>{
+export async function buildUnlockTransaction({ txid, receiveAddress, privkey, oIdx = 0 }: UnlockTransactionProps): Promise<{ redeemTx: string, satoshisUnlocked: number, lockedBlock: number }>{
     try {
         const rawtx = await getRawTx(txid)
         const lockedUTXO = getUTXO(rawtx, oIdx)
@@ -114,7 +114,8 @@ export async function buildUnlockTransaction({ txid, receiveAddress, privkey, oI
         bsvTx.inputs[0].setScript(new bsv.Script(solution));
         return {
             redeemTx: bsvTx.toString(),
-            satoshisUnlocked: lockedUTXO.satoshis
+            satoshisUnlocked: lockedUTXO.satoshis,
+            lockedBlock
         };
     } catch (error) {
         console.error(error)

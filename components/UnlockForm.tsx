@@ -9,7 +9,7 @@ import { MethodCallOptions, PubKey, findSig, hash160, toByteString, toHex } from
 import NotifySuccess from "./NotifySuccess"
 import NotifyError from "./NotifyError"
 import { useRelayX } from "@/context/RelayXContext"
-import { broadcastTx } from "@/utils/whatsonchain"
+import { broadcastTx, getCurrentBlock } from "@/utils/whatsonchain"
 
 export default function UnlockForm(){
 
@@ -21,10 +21,15 @@ export default function UnlockForm(){
         e.preventDefault()
         // tx to unlock (might not work cuz 1sat locked) : 342767848fd05057808b4f381c10df52e7a8738745bd90d4ce2d0517b5be1fe1
         try {
+            const currentBlock = await getCurrentBlock()
             const wallet = LocalWallet.fromPhrase({ phrase : seedPhrase })
             console.log({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
-            const { redeemTx, satoshisUnlocked } = await buildUnlockTransaction({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
-            console.log(redeemTx, satoshisUnlocked)
+            const { redeemTx, satoshisUnlocked,lockedBlock } = await buildUnlockTransaction({ txid: txToUnlock, receiveAddress: relayXAddress, privkey: wallet.privateKey! })
+            console.log(redeemTx, satoshisUnlocked, lockedBlock)
+
+            if(currentBlock < lockedBlock){
+                throw new Error(`These coins are locked until block #${lockedBlock} (current: #${currentBlock})`)
+            }
             const broadcastResp = await broadcastTx(redeemTx)
             console.log(broadcastResp)
             toast.custom(<NotifySuccess txid={broadcastResp} message={`You just unlocked ₿${(satoshisUnlocked *1e-8).toFixed(4)}!`}/>)
