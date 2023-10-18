@@ -21,6 +21,7 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
     const amount = useMemo(() =>  parseFloat(inputAmount) || 0,[inputAmount])
     const [blockHeight, setBlockHeight] = useState(0)
     const [lockToAddress, setLockToAddress] = useState(relayXAddress || "")
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         relayXAddress && relayXAddress.length > 0 && setLockToAddress(relayXAddress)
@@ -46,6 +47,7 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setLoading(true)
         if(!authenticated){
             //@ts-ignore
             document.getElementById('wallet_selector')!.showModal()
@@ -74,9 +76,13 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
 
             const relayXResponse = await relayXSendTransaction(tx)
             console.log(relayXResponse)
+            setLoading(false)
+            setInputAmount("")
+            setBlockHeight(0)
             toast.custom(<NotifySuccess message={`You just locked ${amount}₿ until block #${lockUntilHeight}!`} txid={relayXResponse!.txid}/>)
         } catch (error:any) {
             console.error(error)
+            setLoading(false)
             toast.custom(<NotifyError message={error.toString()} />)
         }
 
@@ -130,7 +136,13 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
             <span>This website is experimental, Lock at your own risk</span>
         </div>
         <div className='w-full flex justify-end mt-5'>
-            <button disabled={!(amount > 0) || !(blockHeight > 0)} type='submit' className="btn btn-primary">Lock It Up!</button>
+            {!loading ? 
+                <button disabled={!(amount > 0) || !(blockHeight > 0)} type='submit' className="w-36 btn btn-primary">Lock It Up!</button>
+            :
+            <button className="btn btn-primary w-36">
+                <span className="loading loading-dots loading-lg"></span>
+            </button>
+            }
             {/* <button disabled={true} type='submit' className="btn btn-primary">Lock It Up!</button> */}
         </div>
     </form>
