@@ -17,7 +17,8 @@ interface LockupFormProps {
 const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
     const { authenticated } = useBitcoin()
     const { relayXAddress, relayXSendTransaction } = useRelayX()
-    const [amount, setAmount] = useState(0)
+    const [inputAmount, setInputAmount] = useState("")
+    const amount = useMemo(() =>  parseFloat(inputAmount) || 0,[inputAmount])
     const [blockHeight, setBlockHeight] = useState(0)
     const [lockToAddress, setLockToAddress] = useState(relayXAddress || "")
 
@@ -82,8 +83,12 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
     }
 
     const handleChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value: number = parseFloat(e.target.value) 
-        setAmount(value)
+        let value = e.target.value
+        const regex = /^\d+(\.\d*)?$/
+        if(regex.test(value) || value.length < 1){
+
+            setInputAmount(value)
+        }
 
     }
 
@@ -101,7 +106,7 @@ const LockupForm = ({ txid, currentHeight } : LockupFormProps) => {
                 <span className="label-text">Amount to lock</span>
                 <span className="label-text-alt">{amount} ₿</span>
             </label>
-            <input type="number" value={amount} onChange={handleChangeAmount} min={0} step="any" placeholder="Enter amount" className="input input-primary input-bordered w-full" />
+            <input type="text" inputMode='decimal' value={inputAmount} onChange={handleChangeAmount} placeholder="Enter amount" className="input input-primary input-bordered w-full" />
         </div>
         <div className="form-control">
             <label className="label">
